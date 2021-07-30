@@ -25,7 +25,7 @@ SECRET_KEY = 'django-insecure-db6hk(y2pj@=dtk(j(r)!^#t28kklsh_htc9p_kmp=ug@2^&(7
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ['127.0.0.1']
 
 
 # Application definition
@@ -41,6 +41,7 @@ INSTALLED_APPS = [
     'drf_yasg',
     'comments',
     'mptt',
+    'debug_toolbar',
 ]
 
 MIDDLEWARE = [
@@ -51,8 +52,12 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
+    'debug_toolbar.middleware.DebugToolbarMiddleware',
 ]
 
+INTERNAL_IPS = [
+    '127.0.0.1',
+]
 ROOT_URLCONF = 'DRF_Comments.urls'
 
 TEMPLATES = [
