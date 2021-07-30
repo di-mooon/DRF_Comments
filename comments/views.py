@@ -23,22 +23,25 @@ class ArticleCreateView(generics.CreateAPIView):
 
 class CommentView(generics.ListAPIView):
     """Вывод всех комментариев"""
-    queryset = Comments.objects.filter(is_published=True).select_related('parent', 'articles')
+    queryset = Comments.objects.prefetch_related('children', 'parent').filter(is_published=True)
     serializer_class = CommentSerializer
 
 
 class CommentDetailView(APIView):
     """Вывод комментариев до 3 уровня вложенности"""
+
     def get(self, request, pk):
-        comments = Comments.objects.filter(articles_id=pk, is_published=True).select_related('parent', 'articles')
+        comments = Comments.objects.filter(articles_id=pk, is_published=True).prefetch_related('children', 'parent',
+                                                                                               'articles')
         serializer = CommentDetailSerializer(comments, many=True)
         return Response(serializer.data)
 
 
 class CommentListView(APIView):
     """Вывод комментариев 3 уровня вложенности"""
+
     def get(self, request, pk):
-        comments = Comments.objects.filter(articles_id=pk, is_published=True).select_related('parent', 'articles')
+        comments = Comments.objects.filter(articles_id=pk, is_published=True).prefetch_related('children')
         serializer = CommentListSerializer(comments, many=True)
         return Response(serializer.data)
 
@@ -46,6 +49,3 @@ class CommentListView(APIView):
 class CommentCreateView(generics.CreateAPIView):
     """Добавление комментария"""
     serializer_class = CommentsCreateSerializer
-
-
-

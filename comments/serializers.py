@@ -46,14 +46,12 @@ class RecursiveSerializer(serializers.Serializer):
 
 class CommentBaseSerializer(serializers.ModelSerializer):
 
-    children = serializers.SlugRelatedField(read_only=True, many=True, slug_field='name')
-
     class Meta:
         model = Comments
-        fields = ('name', 'text', 'date', 'is_published', 'articles', 'children', 'parent')
+        fields = ('name', 'text', 'date', 'is_published', 'articles', 'parent')
 
 
-class CommentSerializer(CommentBaseSerializer):
+class CommentSerializer(serializers.ModelSerializer):
     """Рекурсивный вывод комментариев"""
     children = RecursiveSerializer(many=True)
 
@@ -90,7 +88,7 @@ class CommentsCreateSerializer(serializers.ModelSerializer):
 class ArticleDetailSerializer(serializers.ModelSerializer):
     """Статья"""
 
-    comments = CommentListSerializer(many=True)
+    comments = CommentDetailSerializer(many=True)
 
     class Meta:
         model = Articles
