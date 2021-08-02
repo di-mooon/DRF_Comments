@@ -1,7 +1,5 @@
-from abc import ABC, ABCMeta
-
 from rest_framework import serializers
-from .models import Articles, Comments
+from .models import Articles, CommentsMptt
 
 
 class ArticleListSerializer(serializers.ModelSerializer):
@@ -20,22 +18,6 @@ class ArticleCreateSerializer(serializers.ModelSerializer):
         fields = "__all__"
 
 
-class FilterCommentsSerializer(serializers.ListSerializer):
-    """Фильтр комментариев"""
-
-    def to_representation(self, data):
-        data = data.filter(parent__isnull=True)
-        return super().to_representation(data)
-
-
-class FilterTreeCommentSerializer(serializers.ListSerializer):
-    """Фильтр комментариев до 3 уровня"""
-
-    def to_representation(self, data):
-        data = data.filter(parent__parent__isnull=False, parent__parent__parent__isnull=True)
-        return super().to_representation(data)
-
-
 class RecursiveSerializer(serializers.Serializer):
     """Рекурсивный вывод комментариев"""
 
@@ -45,53 +27,55 @@ class RecursiveSerializer(serializers.Serializer):
 
 
 class CommentBaseSerializer(serializers.ModelSerializer):
-    # children = serializers.SlugRelatedField(read_only=True, many=True,slug_field='name')
     class Meta:
-        model = Comments
-        fields = ('name', 'text', 'date', 'is_published', 'articles','children','parent')
-
+        model = CommentsMptt
+        fields = (
+            'name', 'text', 'date', 'is_published', 'articles', 'level', 'tree_id', 'parent',
+        )
 
 
 class CommentSerializer(serializers.ModelSerializer):
     """Рекурсивный вывод комментариев"""
-    children = RecursiveSerializer(many=True)
-
+    childrenmptt = RecursiveSerializer(many=True, read_only=True)
 
     class Meta:
-        list_serializer_class = FilterCommentsSerializer
-        model = Comments
-        fields = ('name', 'text', 'date', 'is_published', 'articles', 'children')
+        model = CommentsMptt
+        fields = (
+            'name', 'text', 'date', 'is_published', 'articles', 'level', 'tree_id', 'parent',
+            'childrenmptt'
+        )
 
 
 class CommentDetailSerializer(CommentSerializer):
     """Комментарии до 3 уровня"""
 
     articles = serializers.SlugRelatedField(read_only=True, slug_field='title')
-    children = CommentBaseSerializer(many=True)
+    childrenmptt = CommentBaseSerializer(many=True, read_only=True)
 
 
-class CommentListSerializer(CommentSerializer):
+class CommentListSerializer(serializers.ModelSerializer):
     """Комментарии 3 уровня"""
 
     class Meta:
-        list_serializer_class = FilterTreeCommentSerializer
-        model = Comments
-        fields = ('name', 'text', 'date', 'is_published', 'articles', 'children')
+        model = CommentsMptt
+        fields = (
+            'name', 'text', 'date', 'is_published', 'articles', 'level', 'tree_id', 'parent',
+        )
 
 
 class CommentsCreateSerializer(serializers.ModelSerializer):
     """Добавление комментария к статье"""
 
     class Meta:
-        model = Comments
+        model = CommentsMptt
         fields = "__all__"
 
 
 class ArticleDetailSerializer(serializers.ModelSerializer):
     """Статья"""
 
-    comments = CommentDetailSerializer(many=True)
+    commentsmptt = CommentListSerializer(many=True)
 
     class Meta:
         model = Articles
-        fields = ('title', 'author', 'text', 'date', 'is_published', 'comments')
+        fields = ('title', 'author', 'text', 'date', 'is_published', 'commentsmptt')

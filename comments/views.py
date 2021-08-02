@@ -23,25 +23,35 @@ class ArticleCreateView(generics.CreateAPIView):
 
 class CommentView(generics.ListAPIView):
     """Вывод всех комментариев"""
-    queryset = Comments.objects.prefetch_related('children', 'parent').filter(is_published=True)
+    queryset = CommentsMptt.objects.filter(is_published=True, level=0).prefetch_related(
+
+        'childrenmptt',
+    )
     serializer_class = CommentSerializer
 
 
 class CommentDetailView(APIView):
-    """Вывод комментариев до 3 уровня вложенности"""
+    """Вывод комментариев к статье до 3 уровня вложенности"""
 
     def get(self, request, pk):
-        comments = Comments.objects.filter(articles_id=pk, is_published=True).prefetch_related('children', 'parent',
-                                                                                               'articles')
+        comments = CommentsMptt.objects.filter(articles_id=pk, is_published=True, level=0).prefetch_related(
+
+            'articles',
+            'childrenmptt'
+        )
         serializer = CommentDetailSerializer(comments, many=True)
         return Response(serializer.data)
 
 
 class CommentListView(APIView):
-    """Вывод комментариев 3 уровня вложенности"""
+    """Вывод комментариев к статье 3 уровня вложенности"""
 
     def get(self, request, pk):
-        comments = Comments.objects.filter(articles_id=pk, is_published=True).prefetch_related('children')
+        comments = CommentsMptt.objects.filter(articles_id=pk, is_published=True,
+                                               level=2).get_descendants(include_self=True).prefetch_related(
+            'childrenmptt',
+
+        )
         serializer = CommentListSerializer(comments, many=True)
         return Response(serializer.data)
 

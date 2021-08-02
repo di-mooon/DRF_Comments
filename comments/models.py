@@ -1,4 +1,5 @@
 from django.db import models
+from mptt.models import MPTTModel, TreeForeignKey
 
 
 class Articles(models.Model):
@@ -17,29 +18,31 @@ class Articles(models.Model):
         verbose_name_plural = 'Статьи'
 
 
-class Comments(models.Model):
+class CommentsMptt(MPTTModel):
     """Комментарий к статье"""
     name = models.CharField('Имя пользователя', max_length=250)
     text = models.TextField('Текст')
     date = models.DateField('Дата', auto_now_add=True)
     is_published = models.BooleanField('Публикация', default=True)
-    parent = models.ForeignKey(
+    parent = TreeForeignKey(
         'self',
-        on_delete=models.SET_NULL,
+        on_delete=models.CASCADE,
         blank=True, null=True,
         verbose_name='Родитель',
-        related_name='children'
+        related_name='childrenmptt',
     )
     articles = models.ForeignKey(
         Articles,
         on_delete=models.CASCADE,
         verbose_name='Статья',
-        related_name="comments"
+        related_name="commentsmptt"
     )
 
     def __str__(self):
         return self.name
 
     class Meta:
-        verbose_name = 'Комментарии'
-        verbose_name_plural = 'Комментарии'
+        verbose_name = 'Комментарии MPTT'
+        verbose_name_plural = 'Комментарии MPTT'
+
+
