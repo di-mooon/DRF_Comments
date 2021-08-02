@@ -53,16 +53,6 @@ class CommentDetailSerializer(CommentSerializer):
     childrenmptt = CommentBaseSerializer(many=True, read_only=True)
 
 
-class CommentListSerializer(serializers.ModelSerializer):
-    """Комментарии 3 уровня"""
-
-    class Meta:
-        model = CommentsMptt
-        fields = (
-            'name', 'text', 'date', 'is_published', 'articles', 'level', 'tree_id', 'parent',
-        )
-
-
 class CommentsCreateSerializer(serializers.ModelSerializer):
     """Добавление комментария к статье"""
 
@@ -74,7 +64,7 @@ class CommentsCreateSerializer(serializers.ModelSerializer):
 class ArticleDetailSerializer(serializers.ModelSerializer):
     """Статья"""
 
-    commentsmptt = CommentListSerializer(many=True)
+    commentsmptt = CommentBaseSerializer(many=True)
 
     class Meta:
         model = Articles

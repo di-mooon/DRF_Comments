@@ -52,7 +52,7 @@ class CommentListView(APIView):
             'childrenmptt',
 
         )
-        serializer = CommentListSerializer(comments, many=True)
+        serializer = CommentBaseSerializer(comments, many=True)
         return Response(serializer.data)
 
 
