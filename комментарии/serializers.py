@@ -27,6 +27,7 @@ class RecursiveSerializer(serializers.Serializer):
 
 
 class CommentBaseSerializer(serializers.ModelSerializer):
+    """Вывод комментария"""
     class Meta:
         model = CommentsMptt
         fields = (
@@ -35,7 +36,7 @@ class CommentBaseSerializer(serializers.ModelSerializer):
 
 
 class CommentSerializer(serializers.ModelSerializer):
-    """Рекурсивный вывод комментариев"""
+    """Вывод всех комментариев"""
     childrenmptt = RecursiveSerializer(many=True, read_only=True)
 
     class Meta:
