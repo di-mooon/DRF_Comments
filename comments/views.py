@@ -47,11 +47,11 @@ class CommentListView(APIView):
     """Вывод комментариев к статье 3 уровня вложенности"""
 
     def get(self, request, pk):
-        comments = CommentsMptt.objects.filter(articles_id=pk, is_published=True,
-                                               level=2).get_descendants(include_self=True).prefetch_related(
-            'childrenmptt',
-
-        )
+        comments = CommentsMptt.objects.filter(
+            articles_id=pk,
+            is_published=True,
+            level=2
+        ).get_descendants(include_self=True).prefetch_related('childrenmptt',)
         serializer = CommentBaseSerializer(comments, many=True)
         return Response(serializer.data)
 
