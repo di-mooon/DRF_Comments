@@ -18,7 +18,7 @@ class Articles(models.Model):
         verbose_name_plural = 'Статьи'
 
 
-class CommentsMptt(MPTTModel):
+class Comments(MPTTModel):
     """Комментарий к статье"""
     name = models.CharField('Имя пользователя', max_length=250)
     text = models.TextField('Текст')
@@ -29,20 +29,20 @@ class CommentsMptt(MPTTModel):
         on_delete=models.CASCADE,
         blank=True, null=True,
         verbose_name='Родитель',
-        related_name='childrenmptt',
+        related_name='children',
     )
     articles = models.ForeignKey(
         Articles,
         on_delete=models.CASCADE,
         verbose_name='Статья',
-        related_name="commentsmptt"
+        related_name="comments"
     )
 
     def __str__(self):
         return self.name
 
     class Meta:
-        verbose_name = 'Комментарии MPTT'
-        verbose_name_plural = 'Комментарии MPTT'
+        verbose_name = 'Комментарии'
+        verbose_name_plural = 'Комментарии'
 
 

@@ -1,12 +1,8 @@
-from django.urls import path
 from . import views
+from rest_framework.routers import DefaultRouter
 
-urlpatterns = [
-    path('articles/', views.ArticleListView.as_view(), name='Articles'),
-    path('articles/<int:pk>', views.ArticleDetailView.as_view(), name='Article'),
-    path('articles-create/', views.ArticleCreateView.as_view()),
-    path('comments/', views.CommentView.as_view(), name='Comments'),
-    path('comments-list/<int:pk>', views.CommentListView.as_view()),
-    path('comments-detail/<int:pk>', views.CommentDetailView.as_view()),
-    path('comments-create/', views.CommentCreateView.as_view()),
-]
+router = DefaultRouter()
+router.register("article", views.ArticleViewSet, basename="articles")
+router.register('comments', views.CommentsListViewSet, basename='comments')
+urlpatterns = router.urls
+

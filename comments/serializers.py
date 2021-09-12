@@ -1,72 +1,50 @@
 from rest_framework import serializers
-from .models import Articles, CommentsMptt
+from .models import Articles, Comments
 
 
-class ArticleListSerializer(serializers.ModelSerializer):
-    """Список статей"""
-
-    class Meta:
-        model = Articles
-        fields = ('title',)
-
-
-class ArticleCreateSerializer(serializers.ModelSerializer):
-    """Добавление статьи"""
-
-    class Meta:
-        model = Articles
-        fields = "__all__"
-
-
-class RecursiveSerializer(serializers.Serializer):
-    """Рекурсивный вывод комментариев"""
-
-    def to_representation(self, value):
-        serializer = self.parent.parent.__class__(value, context=self.context)
-        return serializer.data
-
-
-class CommentBaseSerializer(serializers.ModelSerializer):
-    """Вывод комментария"""
-    class Meta:
-        model = CommentsMptt
-        fields = (
-            'name', 'text', 'date', 'is_published', 'articles', 'level', 'tree_id', 'parent',
-        )
-
-
-class CommentSerializer(serializers.ModelSerializer):
+class CommentsListSerializer(serializers.ModelSerializer):
     """Вывод всех комментариев"""
-    childrenmptt = RecursiveSerializer(many=True, read_only=True)
+
+    url = serializers.HyperlinkedIdentityField(view_name='comments-detail')
 
     class Meta:
-        model = CommentsMptt
+        model = Comments
         fields = (
-            'name', 'text', 'date', 'is_published', 'articles', 'level', 'tree_id', 'parent',
-            'childrenmptt'
+            'id', 'name', 'text', 'date', 'is_published', 'articles', 'level', 'tree_id', 'parent', 'url',
         )
 
 
-class CommentDetailSerializer(CommentSerializer):
-    """Комментарии до 3 уровня"""
+class CommentsDetailSerializer(CommentsListSerializer):
+    """Комментарий и ответы на него"""
 
-    articles = serializers.SlugRelatedField(read_only=True, slug_field='title')
-    childrenmptt = CommentBaseSerializer(many=True, read_only=True)
+    children = serializers.SerializerMethodField()
 
-
-class CommentsCreateSerializer(serializers.ModelSerializer):
-    """Добавление комментария к статье"""
+    def get_children(self, obj):
+        return [CommentsListSerializer(comment, context=self.context).data for comment in
+                Comments.objects.get(id=obj.id, is_published=True).get_descendants(include_self=False)]
 
     class Meta:
-        model = CommentsMptt
-        fields = "__all__"
+        model = Comments
+        fields = ('id', 'name', 'text', 'date', 'is_published', 'articles', 'tree_id', 'parent', 'url', 'children',)
 
 
 class ArticleDetailSerializer(serializers.ModelSerializer):
     """Статья"""
+    comments = serializers.SerializerMethodField()
 
-    commentsmptt = CommentBaseSerializer(many=True)
+    def get_comments(self, obj):
+        return [CommentsListSerializer(comment, context=self.context).data for comment in
+                Comments.objects.filter(articles_id=obj.id, level=0)]
 
     class Meta:
         model = Articles
-        fields = ('title', 'author', 'text', 'date', 'is_published', 'commentsmptt')
+        fields = ('title', 'author', 'text', 'date', 'is_published', 'comments')
+
+
+class ArticleListSerializer(serializers.ModelSerializer):
+    """Список статей"""
+    url = serializers.HyperlinkedIdentityField(view_name='articles-detail')
+
+    class Meta:
+        model = Articles
+        fields = ('title', 'author', 'text', 'is_published', 'url')
