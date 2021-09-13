@@ -78,17 +78,23 @@ WSGI_APPLICATION = 'DRF_Comments.wsgi.application'
 # Database
 # https://docs.djangoproject.com/en/3.2/ref/settings/#databases
 
+# DATABASES = {
+#     'default': {
+#         'ENGINE': 'django.db.backends.postgresql_psycopg2',
+#         'NAME': 'TEST_SM',
+#         'USER': 'dmitriy',
+#         'PASSWORD': '123456db',
+#         'HOST': 'localhost',
+#         'PORT': '5432',
+#     }
+# }
+
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.postgresql_psycopg2',
-        'NAME': 'TEST_SM',
-        'USER': 'dmitriy',
-        'PASSWORD': '123456db',
-        'HOST': 'localhost',
-        'PORT': '5432',
+        'ENGINE': 'django.db.backends.sqlite3',
+        'NAME': BASE_DIR / 'db.sqlite3',
     }
 }
-
 
 
 AUTH_PASSWORD_VALIDATORS = [
