@@ -20,8 +20,9 @@ class CommentsDetailSerializer(CommentsListSerializer):
     children = serializers.SerializerMethodField()
 
     def get_children(self, obj):
-        return [CommentsListSerializer(comment, context=self.context).data for comment in
-                Comments.objects.get(id=obj.id, is_published=True).get_descendants(include_self=False)]
+
+        return [CommentsListSerializer(comment, context=self.context).data for comment in obj.children.all()]
+
 
     class Meta:
         model = Comments
@@ -33,8 +34,7 @@ class ArticleDetailSerializer(serializers.ModelSerializer):
     comments = serializers.SerializerMethodField()
 
     def get_comments(self, obj):
-        return [CommentsListSerializer(comment, context=self.context).data for comment in
-                Comments.objects.filter(articles_id=obj.id, level=0)]
+        return [CommentsListSerializer(comment, context=self.context).data for comment in obj.comments.all()]
 
     class Meta:
         model = Articles
