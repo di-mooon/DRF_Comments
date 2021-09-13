@@ -20,9 +20,7 @@ class CommentsDetailSerializer(CommentsListSerializer):
     children = serializers.SerializerMethodField()
 
     def get_children(self, obj):
-
         return [CommentsListSerializer(comment, context=self.context).data for comment in obj.children.all()]
-
 
     class Meta:
         model = Comments
