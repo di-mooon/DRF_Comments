@@ -34,3 +34,4 @@ sqlparse
 toml
 uritemplate
 urllib3
+python-dotenv
